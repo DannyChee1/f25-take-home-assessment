@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import uvicorn
+import uuid
 
 app = FastAPI(title="Weather Data System", version="1.0.0")
 
@@ -17,7 +18,7 @@ app.add_middleware(
 # In-memory storage for weather data
 weather_storage: Dict[str, Dict[str, Any]] = {}
 
-class WeatherRequest(BaseModel):
+class   WeatherRequest(BaseModel):
     date: str
     location: str
     notes: Optional[str] = ""
@@ -27,6 +28,9 @@ class WeatherResponse(BaseModel):
 
 @app.post("/weather", response_model=WeatherResponse)
 async def create_weather_request(request: WeatherRequest):
+    unique_id = str(uuid.uuid1())
+    weather_storage[unique_id] = request.dict()
+    return WeatherResponse(id=unique_id)
     """
     You need to implement this endpoint to handle the following:
     1. Receive form data (date, location, notes)
@@ -34,7 +38,6 @@ async def create_weather_request(request: WeatherRequest):
     3. Stores combined data with unique ID in memory
     4. Returns the ID to frontend
     """
-    pass
 
 @app.get("/weather/{weather_id}")
 async def get_weather_data(weather_id: str):
